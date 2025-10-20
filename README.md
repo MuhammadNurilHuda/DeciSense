@@ -22,7 +22,7 @@ An intelligent, config-driven data science framework that automates EDA, feature
 
 ## 🛠️ Implementation Plan
 
-### Phase 1 – MVP (Weeks 1–2)
+### Phase 1 – MVP
 1. Set up repository structure  
 ```
 
