@@ -1,7 +1,7 @@
-# Core
-pandas>=2.0
-numpy>=2.0
-scikit-learn>=1.3.0
-
-# Development
-pytest>=7.5
+pandas==1.5.3
+numpy==1.24.3
+scikit-learn==1.3.0
+pyyaml==6.0.1
+click==8.1.7
+jinja2==3.1.2
+tqdm==4.66.1
