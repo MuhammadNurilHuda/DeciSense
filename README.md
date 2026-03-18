@@ -1,109 +1,214 @@
-# [Ongoing...]🧠 DeciSense
+# DeciSense
 
-An intelligent, config-driven data science framework that automates EDA, feature engineering, model training, and reporting. It uses built-in logic and optional LLM reasoning to make smart, bias-aware decisions across the entire ML pipeline.
+**DeciSense** is an agentic AI system designed to automate end-to-end tabular data science workflows — from raw dataset ingestion to model recommendation and experimentation — using a structured, decision-driven approach.
 
----
+The system is built around a simple idea:
 
-## 🚧 Project Status
-**Current Stage:** Early Development
-**Goal:** Build the foundation for a modular, reproducible, and adaptive ML automation framework.
+> _A user should be able to upload raw data and receive meaningful insights, recommendations, and (optionally) trained models — without manual intervention._
 
 ---
 
-## 🧩 Core Features (Planned)
-- Automated **EDA** (missingness, outliers, imbalance, leakage hints)
-- Config-driven **preprocessing** & **feature engineering**
-- Smart **model selection & evaluation**
-- **LLM-assisted decisions** for imputations, encoders, and bias detection
-- Auto-generated **reports** (HTML/JSON) with metrics, plots, and insights
-- Reproducible **pipelines** and consistent test-time transformations
+## 🚀 Vision
+
+DeciSense aims to simulate the workflow of a **senior data scientist**:
+
+1. Understand the dataset
+2. Diagnose data quality and risks
+3. Recommend appropriate modeling strategies
+4. Execute experiments (only when approved)
+5. Deliver interpretable, actionable results
+
+Rather than blindly training models, DeciSense emphasizes **analysis-first decision making**.
 
 ---
 
-## 🛠️ Implementation Plan
+## ⚙️ Core Workflow (MVP v0)
 
-### Phase 1 – MVP
-1. Set up repository structure  
 ```
 
-src/
-core/
-preprocess/
-features/
-models/
-eval/
-report/
-llm_agent/
-configs/
-data/
-artifacts/
-reports/
-tests/
+User → Upload Dataset (Telegram)
+↓
+[Analysis Phase]
+↓
+Agent performs:
 
-````
-2. Implement CLI skeleton:  
-- `deci run --config config.yaml`  
-- `deci eda`, `deci train`, `deci report`
-3. Build data loader, schema inference, and stratified split.  
-4. Add EDA module: missingness, outliers, imbalance, leakage hints.  
-5. Basic model zoo: Logistic Regression, Random Forest, LightGBM.  
-6. CV + metrics (ROC-AUC, F1, RMSE); save artifacts & metrics.json.  
-7. Generate HTML report summarizing pipeline & performance.
+* Data validation (tabular check)
+* Dataset profiling (missing values, imbalance, etc.)
+* Task inference (classification/regression)
+* Risk detection (leakage, high cardinality, etc.)
+  ↓
+  Agent recommends:
+* Best initial model
+* Initial hyperparameters
+* Reasoning behind selection
+  ↓
+  User decision:
+  ├─ "no"  → Return analysis-only bundle
+  └─ "yes" → Proceed to training
+  ↓
+  Model training + evaluation
+  ↓
+  Final results + artifacts
 
-### Phase 2 – Smart Engine
-1. Implement **LLMDecisionAgent** using open LLMs (Phi-3, Mistral-7B).  
-2. Generate dynamic preprocessing configs (imputer, encoder, scaler).  
-3. Integrate reasoning logs (`report/llm_decision.log`).  
-4. Extend feature engineering: datetime, interactions, text (TF-IDF).  
-5. Add explainability (Permutation Importance, optional SHAP).  
-
-### Phase 3 – Reporting & Stability
-1. Segment error analysis (by region, channel, etc.).  
-2. Add drift/stability checks (PSI, cross-fold variance).  
-3. Enhance HTML report with interactive visualizations.  
-4. Package as installable CLI (`pip install decisense`).  
-
-### Phase 4 – Community & Extensions
-1. Add plugin system for custom transformers & models.  
-2. Integrate experiment tracking (MLflow optional).  
-3. Add Dockerfile + example notebooks.  
-4. Release v0.2 Beta on PyPI.
+```
 
 ---
 
-## ⚡ Quick Start (Planned)
-```bash
-pip install decisense
-deci run --config configs/exp.yaml
-````
+## 🧠 System Architecture
+
+DeciSense is composed of three main layers:
+
+### 1. OpenClaw (Agent Orchestration Layer)
+- Handles multi-agent reasoning and workflow control
+- Manages Telegram communication
+- Maintains session state and approval flow
+
+### 2. Python DS Engine (Execution Layer)
+- Performs all data science operations:
+  - Data loading & validation
+  - Profiling & EDA
+  - Model selection & training
+  - Evaluation & overfitting checks
+- Produces structured outputs for agent interpretation
+
+### 3. Artifact & State Layer
+- Stores experiment runs
+- Packages results into `.tar.gz`
+- Tracks user sessions and decisions
 
 ---
 
-## 🧭 Roadmap Summary
+## 📁 Project Structure
 
-| Phase | Focus        | Key Deliverable            |
-| ----- | ------------ | -------------------------- |
-| 1     | MVP          | EDA, model zoo, report     |
-| 2     | Smart Engine | LLM-based decision-making  |
-| 3     | Reporting    | HTML + stability           |
-| 4     | Community    | Plugins, tracking, release |
+```
+
+project/
+├─ openclaw/
+│  ├─ config/
+│  └─ skills/
+│
+├─ ds_engine/
+│  ├─ intake/
+│  ├─ profiling/
+│  ├─ planning/
+│  ├─ modeling/
+│  ├─ evaluation/
+│  ├─ reporting/
+│  └─ pipeline.py
+│
+├─ runs/
+│  └─ <run_id>/
+│
+├─ bot_state/
+│
+├─ requirements.txt
+└─ README.md
+
+```
 
 ---
 
-## 📜 License
+## 🔍 Key Features (MVP Scope)
 
-MIT License (to be finalized)
+- Tabular dataset validation
+- Automated dataset profiling
+- Task type inference (classification / regression)
+- Model recommendation with reasoning
+- Conditional execution (user approval before training)
+- Basic experiment tracking
+- Artifact packaging (`.tar.gz`)
+- Telegram-based interaction
+
+---
+
+## 🧪 Model Scope (Initial)
+
+**Classification**
+- Logistic Regression (baseline)
+- Random Forest
+- CatBoost / LightGBM (if available)
+
+**Regression**
+- Linear / Ridge Regression
+- Random Forest
+- CatBoost / LightGBM
+
+---
+
+## 📦 Output
+
+Depending on user decision:
+
+### Analysis Only
+- Dataset summary
+- Data quality report
+- Risk flags (e.g., leakage, imbalance)
+- Model recommendation
+- Reasoning and assumptions
+
+### Full Pipeline
+- All analysis artifacts
+- Trained models
+- Evaluation metrics
+- Experiment logs
+- Final summary
+
+All outputs are packaged as a downloadable `.tar.gz`.
+
+---
+
+## 🔐 Design Principles
+
+- **Analysis before execution**  
+  Avoid unnecessary computation unless justified.
+
+- **Transparency over automation**  
+  Always explain _why_ a model is recommended.
+
+- **Deterministic core, agentic interface**  
+  Python handles execution; agents handle reasoning.
+
+- **User-in-the-loop decisions**  
+  Critical steps require explicit approval.
+
+---
+
+## ⚠️ Current Limitations
+
+- Tabular data only
+- No automatic feature engineering (beyond basic preprocessing)
+- Limited hyperparameter tuning
+- Target column inference may require user confirmation
+- No deployment/export of production-ready models yet
+
+---
+
+## 🛠️ Future Directions
+
+- Multi-agent specialization (Analyst, Scientist, Reviewer)
+- Advanced hyperparameter optimization
+- Feature engineering pipelines
+- Model interpretability (e.g., SHAP)
+- Experiment tracking dashboard
+- API + web interface (beyond Telegram)
+
+---
+
+## 📌 Status
+
+🚧 Early-stage (MVP in development)
+
+This project is actively being built as part of a personal AI/Data Science portfolio.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome!
-Please open an issue or pull request for ideas, bugs, or feature suggestions.
+Currently not open for contributions.  
+This may change as the project stabilizes.
 
 ---
 
-## 🌟 Vision
+## 📜 License
 
-> *“Let your data think for itself.”*
-> DeciSense turns data pipelines into decision pipelines — bridging automation, reasoning, and insight.
+TBD
