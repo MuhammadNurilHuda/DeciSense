@@ -1,0 +1,121 @@
+# =========================
+#  Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# =========================
+#  Testing
+# =========================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# =========================
+#  Virtual Environment
+# =========================
+.venv/
+venv/
+env/
+
+# =========================
+#  Environment Variables
+# =========================
+.env
+.env.*
+*.env
+
+# =========================
+#  Jupyter (future-proof)
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+#  uv
+# =========================
+# IMPORTANT: we KEEP uv.lock (do NOT ignore)
+# uv.lock
+
+# =========================
+#  Logs
+# =========================
+*.log
+logs/
+
+# =========================
+#  Data Science Artifacts
+# =========================
+# Model files
+*.pkl
+*.joblib
+*.model
+*.bin
+
+# Large datasets
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.parquet
+
+# Temporary data
+data/
+tmp/
+
+# =========================
+#  Experiment Runs (IMPORTANT)
+# =========================
+runs/*
+!runs/.gitkeep
+
+# =========================
+#  OpenClaw / Runtime State
+# =========================
+bot_state/*
+!bot_state/.gitkeep
+
+# =========================
+#  OS-specific
+# =========================
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# =========================
+#  IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+# =========================
+#  Docker
+# =========================
+*.tar
+*.tar.gz
+*.dockerignore
+
+# =========================
+#  Secrets / Keys
+# =========================
+*.pem
+*.key
+*.crt
+secrets/
+
+# =========================
+#  Misc
+# =========================
+*.tmp
+*.bak
+*.swp
+
+README_PERSONAL.md
