@@ -16,6 +16,12 @@ __pycache__/
 .coverage
 .coverage.*
 htmlcov/
+.smoke/
+
+# =========================
+#  Ruff
+# =========================
+.ruff_cache
 
 # =========================
 #  Virtual Environment
@@ -79,12 +85,15 @@ runs/*
 # =========================
 bot_state/*
 !bot_state/.gitkeep
+runs/*
+!runs/.gitkeep
 
 # =========================
 #  OS-specific
 # =========================
 # macOS
 .DS_Store
+.vscode/
 
 # Windows
 Thumbs.db
