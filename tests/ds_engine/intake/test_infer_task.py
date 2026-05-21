@@ -9,7 +9,9 @@ from ds_engine.intake.infer_task import (
 )
 
 
-def test_infer_task_from_dataframe_returns_not_found_when_no_target_column_matches() -> None:
+def test_infer_task_from_dataframe_returns_not_found_when_no_target_column_matches() -> (
+    None
+):
     df = pd.DataFrame(
         {
             "age": [20, 21, 22],
@@ -25,7 +27,9 @@ def test_infer_task_from_dataframe_returns_not_found_when_no_target_column_match
     assert result.status == "not_found"
 
 
-def test_infer_task_from_dataframe_returns_ambiguous_when_multiple_target_candidates_exist() -> None:
+def test_infer_task_from_dataframe_returns_ambiguous_when_multiple_target_candidates_exist() -> (
+    None
+):
     df = pd.DataFrame(
         {
             "target": [0, 1, 0],
@@ -56,7 +60,9 @@ def test_infer_task_from_dataframe_infers_classification_for_string_target() -> 
     assert result.status == "ok"
 
 
-def test_infer_task_from_dataframe_infers_classification_for_small_integer_label_set() -> None:
+def test_infer_task_from_dataframe_infers_classification_for_small_integer_label_set() -> (
+    None
+):
     df = pd.DataFrame(
         {
             "feature": [10, 20, 30, 40],
@@ -71,7 +77,9 @@ def test_infer_task_from_dataframe_infers_classification_for_small_integer_label
     assert result.status == "ok"
 
 
-def test_infer_task_from_dataframe_infers_regression_for_numeric_target_with_many_unique_values() -> None:
+def test_infer_task_from_dataframe_infers_regression_for_numeric_target_with_many_unique_values() -> (
+    None
+):
     df = pd.DataFrame(
         {
             "feature": [1, 2, 3, 4, 5],
@@ -103,7 +111,10 @@ def test_infer_task_from_dataframe_respects_custom_target_candidates() -> None:
     assert result.task_type == "regression"
     assert result.status == "ok"
 
-def test_infer_task_from_dataframe_infers_classification_for_multiclass_integer_labels() -> None:
+
+def test_infer_task_from_dataframe_infers_classification_for_multiclass_integer_labels() -> (
+    None
+):
     df = pd.DataFrame(
         {
             "feature": [10, 11, 12, 13, 14, 15],
@@ -117,7 +128,10 @@ def test_infer_task_from_dataframe_infers_classification_for_multiclass_integer_
     assert result.task_type == "classification"
     assert result.status == "ok"
 
-def test_infer_task_type_from_target_returns_classification_for_boolean_target() -> None:
+
+def test_infer_task_type_from_target_returns_classification_for_boolean_target() -> (
+    None
+):
     target = pd.Series([True, False, True])
 
     result = _infer_task_type_from_target(
@@ -127,7 +141,10 @@ def test_infer_task_type_from_target_returns_classification_for_boolean_target()
 
     assert result == "classification"
 
-def test_infer_task_from_dataframe_returns_ambiguous_for_all_missing_target_column() -> None:
+
+def test_infer_task_from_dataframe_returns_ambiguous_for_all_missing_target_column() -> (
+    None
+):
     df = pd.DataFrame(
         {
             "feature": [1, 2, 3],
@@ -140,5 +157,3 @@ def test_infer_task_from_dataframe_returns_ambiguous_for_all_missing_target_colu
     assert result.candidate_target == "target"
     assert result.task_type is None
     assert result.status == "ambiguous"
-
-    

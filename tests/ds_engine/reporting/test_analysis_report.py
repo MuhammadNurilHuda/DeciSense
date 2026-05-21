@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from ds_engine.pipeline import IntakePipelineConfig, run_intake_pipeline
+from ds_engine.pipeline import run_intake_pipeline
 from ds_engine.reporting.analysis_report import (
     AnalysisReportResult,
     create_analysis_report,

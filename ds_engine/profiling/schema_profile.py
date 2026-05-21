@@ -1,10 +1,13 @@
 """
 Perlu di cek ulang, apakah sudah sesuai dengan kebutuhan atau belum.
 """
+
 from __future__ import annotations
+
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any, Literal
+
 import pandas as pd
 from pandas.api.types import (
     is_bool_dtype,
@@ -12,7 +15,6 @@ from pandas.api.types import (
     is_numeric_dtype,
     is_string_dtype,
 )
-
 
 InferredColumnType = Literal[
     "numeric",
@@ -86,9 +88,7 @@ class SchemaProfileResult:
     @property
     def high_cardinality_columns(self) -> list[str]:
         return [
-            column.column_name
-            for column in self.columns
-            if column.is_high_cardinality
+            column.column_name for column in self.columns if column.is_high_cardinality
         ]
 
     def to_dict(self) -> dict[str, Any]:
@@ -189,7 +189,9 @@ def _profile_column(
     missing_ratio = round(missing_count / row_count, 6) if row_count > 0 else 0.0
 
     unique_count = int(non_null_series.nunique(dropna=True))
-    unique_ratio = round(unique_count / non_null_count, 6) if non_null_count > 0 else 0.0
+    unique_ratio = (
+        round(unique_count / non_null_count, 6) if non_null_count > 0 else 0.0
+    )
 
     inferred_type = _infer_column_type(
         series,
@@ -284,10 +286,7 @@ def _is_high_cardinality(
 
     unique_ratio = unique_count / non_null_count
 
-    return (
-        unique_count >= min_unique_count
-        and unique_ratio >= unique_ratio_threshold
-    )
+    return unique_count >= min_unique_count and unique_ratio >= unique_ratio_threshold
 
 
 def _build_sample_values(
@@ -299,10 +298,7 @@ def _build_sample_values(
         return []
 
     unique_values = pd.unique(non_null_series)
-    return [
-        _to_json_safe_value(value)
-        for value in unique_values[:sample_value_count]
-    ]
+    return [_to_json_safe_value(value) for value in unique_values[:sample_value_count]]
 
 
 def _to_json_safe_value(value: Any) -> Any:

@@ -1,4 +1,5 @@
 """menganalisis target column setelah infer_task.py berhasil menentukan candidate_target dan task_type"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -8,7 +9,6 @@ from typing import Any, Literal
 import pandas as pd
 
 from ds_engine.intake.infer_task import TaskType
-
 
 TargetIssueSeverity = Literal["info", "warning", "critical"]
 
@@ -116,9 +116,7 @@ class TargetProfileResult:
             "missing_count": self.missing_count,
             "missing_ratio": self.missing_ratio,
             "unique_count": self.unique_count,
-            "class_distribution": [
-                item.to_dict() for item in self.class_distribution
-            ],
+            "class_distribution": [item.to_dict() for item in self.class_distribution],
             "majority_class": _to_json_safe_value(self.majority_class),
             "majority_class_ratio": self.majority_class_ratio,
             "minority_class": _to_json_safe_value(self.minority_class),
@@ -249,7 +247,11 @@ def _create_classification_target_profile(
     )
 
     class_imbalance_ratio = None
-    if majority_item is not None and minority_item is not None and len(class_distribution) > 1:
+    if (
+        majority_item is not None
+        and minority_item is not None
+        and len(class_distribution) > 1
+    ):
         class_imbalance_ratio = round(
             majority_item.count / max(minority_item.count, 1),
             6,
@@ -385,7 +387,9 @@ def _create_regression_target_profile(
     )
 
 
-def _build_class_distribution(non_null_target: pd.Series) -> list[ClassDistributionItem]:
+def _build_class_distribution(
+    non_null_target: pd.Series,
+) -> list[ClassDistributionItem]:
     """Build class distribution sorted by descending class frequency."""
     total_count = len(non_null_target)
     value_counts = non_null_target.value_counts(dropna=True)

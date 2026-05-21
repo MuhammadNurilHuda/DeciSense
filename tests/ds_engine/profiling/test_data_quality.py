@@ -15,7 +15,9 @@ def _issue_codes(result: DataQualityResult) -> set[str]:
     return {issue.code for issue in result.issues}
 
 
-def test_create_data_quality_report_returns_clean_summary_for_simple_dataframe() -> None:
+def test_create_data_quality_report_returns_clean_summary_for_simple_dataframe() -> (
+    None
+):
     dataframe = pd.DataFrame(
         {
             "age": [20, 30, 40],
@@ -35,7 +37,9 @@ def test_create_data_quality_report_returns_clean_summary_for_simple_dataframe()
     assert result.is_usable_for_analysis is True
 
 
-def test_create_data_quality_report_flags_missingness_and_fully_missing_columns() -> None:
+def test_create_data_quality_report_flags_missingness_and_fully_missing_columns() -> (
+    None
+):
     dataframe = pd.DataFrame(
         {
             "age": [20, None, 40],
@@ -80,7 +84,9 @@ def test_create_data_quality_report_flags_duplicates_and_constant_columns() -> N
     assert "constant_columns" in _issue_codes(result)
 
 
-def test_create_data_quality_report_flags_high_cardinality_and_possible_id_columns() -> None:
+def test_create_data_quality_report_flags_high_cardinality_and_possible_id_columns() -> (
+    None
+):
     dataframe = pd.DataFrame(
         {
             "customer_id": ["C001", "C002", "C003", "C004", "C005"],

@@ -8,7 +8,6 @@ from ds_engine.profiling.data_quality import DataQualityResult
 from ds_engine.profiling.schema_profile import SchemaProfileResult
 from ds_engine.profiling.target_profile import TargetProfileResult
 
-
 CandidateRole = Literal["recommended", "baseline", "challenger"]
 RecommendationStatus = Literal["ready", "blocked"]
 RecommendationConfidence = Literal["low", "medium", "high"]
@@ -506,7 +505,9 @@ def _build_dataset_notes(
     """Summarize dataset traits used for model recommendation."""
     target_column = target_profile_result.target_column
     feature_profiles = [
-        column for column in schema_profile.columns if column.column_name != target_column
+        column
+        for column in schema_profile.columns
+        if column.column_name != target_column
     ]
     feature_count = len(feature_profiles)
 
@@ -599,7 +600,10 @@ def _build_recommendation_warnings(
             "Text-like columns were detected. The first MVP model should exclude them or use simple text preprocessing."
         )
 
-    if dataset_notes["has_many_categorical_features"] and not allow_optional_dependencies:
+    if (
+        dataset_notes["has_many_categorical_features"]
+        and not allow_optional_dependencies
+    ):
         warnings.append(
             "Many categorical or high-cardinality features were detected. CatBoost may be a stronger optional candidate later."
         )
@@ -615,12 +619,18 @@ def _estimate_recommendation_confidence(
     allow_optional_dependencies: bool,
 ) -> RecommendationConfidence:
     """Estimate confidence in the pre-training recommendation."""
-    if data_quality_result.has_critical_issues or target_profile_result.has_critical_issues:
+    if (
+        data_quality_result.has_critical_issues
+        or target_profile_result.has_critical_issues
+    ):
         return "low"
 
     warning_count = len(data_quality_result.issues) + len(target_profile_result.issues)
 
-    if dataset_notes["has_many_categorical_features"] and not allow_optional_dependencies:
+    if (
+        dataset_notes["has_many_categorical_features"]
+        and not allow_optional_dependencies
+    ):
         return "medium"
 
     if warning_count == 0 and dataset_notes["feature_count"] > 0:

@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Literal
+
 import pandas as pd
 from pandas.api.types import (
     is_bool_dtype,
@@ -10,7 +12,14 @@ from pandas.api.types import (
 TaskType = Literal["classification", "regression"]
 InferenceStatus = Literal["ok", "ambiguous", "not_found"]
 
-DEFAULT_TARGET_CANDIDATES: tuple[str, ...] = ("target", "label", "y", "class", "outcome")
+DEFAULT_TARGET_CANDIDATES: tuple[str, ...] = (
+    "target",
+    "label",
+    "y",
+    "class",
+    "outcome",
+)
+
 
 @dataclass(frozen=True)
 class TaskInferenceResult:
@@ -21,11 +30,13 @@ class TaskInferenceResult:
     status: InferenceStatus
     reasoning: list[str]
 
+
 def infer_task_from_dataframe(
     dataframe: pd.DataFrame,
     *,
     target_candidates: tuple[str, ...] = DEFAULT_TARGET_CANDIDATES,
-    classification_unique_value_threshold: int = 20) -> TaskInferenceResult:
+    classification_unique_value_threshold: int = 20,
+) -> TaskInferenceResult:
     """
     Returns
     -------
@@ -46,9 +57,7 @@ def infer_task_from_dataframe(
             candidate_target=None,
             task_type=None,
             status="not_found",
-            reasoning=[
-                "No target column matched the configured candidate names."
-            ]
+            reasoning=["No target column matched the configured candidate names."],
         )
 
     if len(matched_targets) > 1:
@@ -56,11 +65,9 @@ def infer_task_from_dataframe(
             candidate_target=None,
             task_type=None,
             status="ambiguous",
-            reasoning=[
-                f"Multiple target-like columns were found: {matched_targets}."
-            ]
+            reasoning=[f"Multiple target-like columns were found: {matched_targets}."],
         )
-    
+
     target_column = matched_targets[0]
     target_series = dataframe[target_column]
     if target_series.dropna().empty:
@@ -71,15 +78,15 @@ def infer_task_from_dataframe(
             reasoning=[
                 f"Matched target column '{target_column}'.",
                 "The matched target column contains only missing values.",
-            ]
-    )
+            ],
+        )
     inferred_task_type = _infer_task_type_from_target(
         target_series,
-        classification_unique_value_threshold=classification_unique_value_threshold
+        classification_unique_value_threshold=classification_unique_value_threshold,
     )
 
     reasoning = [f"Matched target column '{target_column}'."]
-    if inferred_task_type == 'classification':
+    if inferred_task_type == "classification":
         reasoning.append(
             "Target was inferred as classification based on dtype and/or limited unique values."
         )
@@ -90,18 +97,18 @@ def infer_task_from_dataframe(
     return TaskInferenceResult(
         candidate_target=target_column,
         task_type=inferred_task_type,
-        status='ok',
-        reasoning=reasoning
+        status="ok",
+        reasoning=reasoning,
     )
 
+
 def _infer_task_type_from_target(
-    target_series: pd.Series,
-    *,
-    classification_unique_value_threshold: int) -> TaskType:
+    target_series: pd.Series, *, classification_unique_value_threshold: int
+) -> TaskType:
     """
     Infer task type from a target series using simple, stable heuristics.
     """
-    
+
     non_null_target = target_series.dropna()
 
     if non_null_target.empty:
@@ -111,10 +118,11 @@ def _infer_task_type_from_target(
     if not is_numeric_dtype(target_series):
         return "classification"
     if _is_label_like_numeric_target(
-        non_null_target,
-        max_class_count=classification_unique_value_threshold):
+        non_null_target, max_class_count=classification_unique_value_threshold
+    ):
         return "classification"
     return "regression"
+
 
 def _is_label_like_numeric_target(
     non_null_target: pd.Series,

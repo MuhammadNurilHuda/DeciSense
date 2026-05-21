@@ -70,7 +70,10 @@ def test_validate_tabular_dataset_warns_for_fully_missing_column() -> None:
 
     assert result.is_valid is True
     assert result.errors == []
-    assert any("Some columns contain only missing values" in warning for warning in result.warnings)
+    assert any(
+        "Some columns contain only missing values" in warning
+        for warning in result.warnings
+    )
 
 
 def test_validate_tabular_dataset_warns_for_row_with_only_missing_values() -> None:
