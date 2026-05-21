@@ -65,7 +65,9 @@ def test_create_target_profile_flags_single_class_classification_target() -> Non
     assert result.is_usable_for_modeling is False
 
 
-def test_create_target_profile_flags_missing_and_imbalanced_classification_target() -> None:
+def test_create_target_profile_flags_missing_and_imbalanced_classification_target() -> (
+    None
+):
     dataframe = pd.DataFrame(
         {
             "feature": list(range(11)),

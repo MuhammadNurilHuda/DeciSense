@@ -1,60 +1,51 @@
 from __future__ import annotations
+
+import json
 from dataclasses import dataclass, field, replace
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from secrets import token_hex
 from typing import Any, Literal
 
 import pandas as pd
-import json
 
 from ds_engine.intake.infer_task import (
     DEFAULT_TARGET_CANDIDATES,
     TaskInferenceResult,
-    infer_task_from_dataframe
+    infer_task_from_dataframe,
 )
-from ds_engine.intake.load_data import (
-    DataLoadError,
-    LoadedDataset,
-    load_tabular_data
-)
+from ds_engine.intake.load_data import DataLoadError, LoadedDataset, load_tabular_data
 from ds_engine.intake.validate_tabular import (
     TabularValidationResult,
-    validate_tabular_dataset
-)
-
-from ds_engine.profiling.data_quality import (
-    DataQualityResult,
-    create_data_quality_report,
-)
-
-from ds_engine.profiling.schema_profile import (
-    SchemaProfileResult,
-    create_schema_profile,
-)
-
-from ds_engine.profiling.target_profile import (
-    TargetProfileError,
-    TargetProfileResult,
-    create_target_profile,
+    validate_tabular_dataset,
 )
 from ds_engine.planning.model_recommender import (
     ModelRecommendationResult,
     recommend_model_for_tabular_data,
 )
-
-
+from ds_engine.profiling.data_quality import (
+    DataQualityResult,
+    create_data_quality_report,
+)
+from ds_engine.profiling.schema_profile import (
+    SchemaProfileResult,
+    create_schema_profile,
+)
+from ds_engine.profiling.target_profile import (
+    TargetProfileError,
+    TargetProfileResult,
+    create_target_profile,
+)
 
 PipelineStatus = Literal[
-    "completed",
-    "load_failed",
-    "validation_failed",
-    "pipeline_error"
+    "completed", "load_failed", "validation_failed", "pipeline_error"
 ]
+
 
 @dataclass(frozen=True)
 class IntakePipelineConfig:
     """ """
+
     min_rows: int = 2
     min_columns: int = 1
     target_candidates: tuple[str, ...] = DEFAULT_TARGET_CANDIDATES
@@ -78,9 +69,11 @@ class IntakePipelineConfig:
     prefer_interpretable_model: bool = False
     allow_optional_model_dependencies: bool = False
 
+
 @dataclass(frozen=True)
 class IntakePipelineResult:
     """ """
+
     run_id: str
     status: PipelineStatus
     source_file: str
@@ -104,12 +97,12 @@ class IntakePipelineResult:
         if self.loaded_dataset is None:
             return None
         return self.loaded_dataset.dataframe
-        
+
     @property
     def is_ready_for_downstream_analysis(self) -> bool:
         """ """
         return (
-            self.status == 'completed'
+            self.status == "completed"
             and self.validation_result is not None
             and self.validation_result.is_valid
         )
@@ -132,16 +125,16 @@ class IntakePipelineResult:
             and self.task_inference_result is not None
             and self.task_inference_result.status == "ok"
         )
-    
+
     @property
     def requires_user_target_input(self) -> bool:
-        """ """
+        """Return True when a valid dataset exists but target inference is unresolved"""
         return (
             self.is_ready_for_downstream_analysis
             and self.task_inference_result is not None
-            and self.task_inference_result != "ok"
+            and self.task_inference_result.status != "ok"
         )
-    
+
     @property
     def is_ready_for_training_approval(self) -> bool:
         """Return True when the pipeline has a model recommendation ready for user approval."""
@@ -152,10 +145,8 @@ class IntakePipelineResult:
         )
 
     def to_dict(
-        self,
-        *,
-        include_preview: bool = False,
-        preview_row_count: int = 5) -> dict[str, Any]:
+        self, *, include_preview: bool = False, preview_row_count: int = 5
+    ) -> dict[str, Any]:
         """ """
         payload: dict[str, Any] = {
             "run_id": self.run_id,
@@ -180,16 +171,16 @@ class IntakePipelineResult:
             payload["loaded_dataset"] = _serialize_loaded_dataset(
                 self.loaded_dataset,
                 include_preview=include_preview,
-                preview_row_count=preview_row_count
+                preview_row_count=preview_row_count,
             )
-        
+
         if self.validation_result is not None:
             payload["validation_result"] = {
                 "is_valid": self.validation_result.is_valid,
                 "errors": list(self.validation_result.errors),
                 "warnings": list(self.validation_result.warnings),
                 "row_count": self.validation_result.row_count,
-                "colum_count": self.validation_result.column_count
+                "column_count": self.validation_result.column_count,
             }
 
         if self.task_inference_result is not None:
@@ -197,7 +188,7 @@ class IntakePipelineResult:
                 "candidate_target": self.task_inference_result.candidate_target,
                 "task_type": self.task_inference_result.task_type,
                 "status": self.task_inference_result.status,
-                "reasoning": list(self.task_inference_result.reasoning)
+                "reasoning": list(self.task_inference_result.reasoning),
             }
 
         if self.schema_profile_result is not None:
@@ -216,11 +207,13 @@ class IntakePipelineResult:
 
         return payload
 
+
 def run_intake_pipeline(
     file_path: str | Path,
     *,
     config: IntakePipelineConfig | None = None,
-    run_id: str | None = None) -> IntakePipelineResult:
+    run_id: str | None = None,
+) -> IntakePipelineResult:
     """
     Execute the intake pipeline:
     1. load dataset
@@ -236,7 +229,7 @@ def run_intake_pipeline(
 
     pipeline_config = config or IntakePipelineConfig()
     actual_run_id = run_id or _generate_run_id()
-    started_at = datetime.now(timezone.utc)
+    started_at = datetime.now(UTC)
     source_file = str(Path(file_path).expanduser())
 
     try:
@@ -244,7 +237,7 @@ def run_intake_pipeline(
         validation_result = validate_tabular_dataset(
             loaded_dataset.dataframe,
             min_rows=pipeline_config.min_rows,
-            min_columns=pipeline_config.min_columns
+            min_columns=pipeline_config.min_columns,
         )
 
         if not validation_result.is_valid:
@@ -256,7 +249,7 @@ def run_intake_pipeline(
                 loaded_dataset=loaded_dataset,
                 validation_result=validation_result,
                 errors=list(validation_result.errors),
-                warnings=list(validation_result.warnings)
+                warnings=list(validation_result.warnings),
             )
             return _maybe_persist_result(result, pipeline_config)
 
@@ -318,7 +311,7 @@ def run_intake_pipeline(
         warnings.extend(_format_data_quality_warnings(data_quality_result))
         warnings.extend(target_profile_warnings)
         warnings.extend(model_recommendation_warnings)
-        
+
         result = _build_result(
             run_id=actual_run_id,
             status="completed",
@@ -341,7 +334,7 @@ def run_intake_pipeline(
             status="load_failed",
             source_file=source_file,
             started_at=started_at,
-            errors=[str(exc)]
+            errors=[str(exc)],
         )
         return _maybe_persist_result(result, pipeline_config)
 
@@ -351,16 +344,18 @@ def run_intake_pipeline(
             status="pipeline_error",
             source_file=source_file,
             started_at=started_at,
-            errors=[f"Unexpected intake pipeline error: {exc}"]
-         )
+            errors=[f"Unexpected intake pipeline error: {exc}"],
+        )
         return _maybe_persist_result(result, pipeline_config)
+
 
 def save_intake_pipeline_artifacts(
     result: IntakePipelineResult,
     *,
     runs_root: str | Path = "runs",
     include_preview: bool = True,
-    preview_row_count: int = 5) -> Path:
+    preview_row_count: int = 5,
+) -> Path:
     """
     Persist an intake pipeline result as JSON under the run directory.
 
@@ -372,8 +367,7 @@ def save_intake_pipeline_artifacts(
 
     output_path = output_dir / "intake_result.json"
     payload = result.to_dict(
-        include_preview=include_preview,
-        preview_row_count=preview_row_count
+        include_preview=include_preview, preview_row_count=preview_row_count
     )
 
     output_path.write_text(
@@ -382,11 +376,10 @@ def save_intake_pipeline_artifacts(
     )
     return output_path
 
+
 def _serialize_loaded_dataset(
-    loaded_dataset: LoadedDataset,
-    *,
-    include_preview: bool,
-    preview_row_count: int) -> dict[str, Any]:
+    loaded_dataset: LoadedDataset, *, include_preview: bool, preview_row_count: int
+) -> dict[str, Any]:
     """ """
     payload: dict[str, Any] = {
         "file_path": str(loaded_dataset.file_path),
@@ -394,19 +387,19 @@ def _serialize_loaded_dataset(
         "file_extension": loaded_dataset.file_extension,
         "row_count": loaded_dataset.row_count,
         "column_count": loaded_dataset.column_count,
-        "column_names": [str(column) for column in loaded_dataset.dataframe.columns]
+        "column_names": [str(column) for column in loaded_dataset.dataframe.columns],
     }
 
     if include_preview:
         payload["preview_rows"] = _build_preview_rows(
-            loaded_dataset.dataframe,
-            preview_row_count
+            loaded_dataset.dataframe, preview_row_count
         )
     return payload
 
+
 def _build_preview_rows(
-    dataframe: pd.DataFrame,
-    preview_row_count: int) -> list[dict[str, Any]]:
+    dataframe: pd.DataFrame, preview_row_count: int
+) -> list[dict[str, Any]]:
     """ """
     if preview_row_count <= 0 or dataframe.empty:
         return []
@@ -415,10 +408,12 @@ def _build_preview_rows(
     preview = preview.where(pd.notna(preview), None)
     return preview.to_dict(orient="records")
 
+
 def _generate_run_id() -> str:
     """ """
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     return f"run_{timestamp}_{token_hex(3)}"
+
 
 def _build_result(
     *,
@@ -434,11 +429,10 @@ def _build_result(
     errors: list[str] | None = None,
     warnings: list[str] | None = None,
     target_profile_result: TargetProfileResult | None = None,
-    model_recommendation_result: ModelRecommendationResult | None = None) -> IntakePipelineResult:
-    """
-    
-    """
-    completed_at = datetime.now(timezone.utc)
+    model_recommendation_result: ModelRecommendationResult | None = None,
+) -> IntakePipelineResult:
+    """ """
+    completed_at = datetime.now(UTC)
 
     return IntakePipelineResult(
         run_id=run_id,
@@ -451,38 +445,38 @@ def _build_result(
         warnings=warnings or [],
         started_at_utc=_to_utc_iso(started_at),
         completed_at_utc=_to_utc_iso(completed_at),
-        elapsed_second=round((completed_at - started_at).total_seconds(),6),
+        elapsed_second=round((completed_at - started_at).total_seconds(), 6),
         schema_profile_result=schema_profile_result,
         data_quality_result=data_quality_result,
         target_profile_result=target_profile_result,
         model_recommendation_result=model_recommendation_result,
     )
 
+
 def _to_utc_iso(value: datetime) -> str:
     """ """
-    return value.astimezone(timezone.utc).isoformat().replace("+00.00", "Z")
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
 
 def _maybe_persist_result(
-    result: IntakePipelineResult,
-    config: IntakePipelineConfig) -> IntakePipelineResult:
+    result: IntakePipelineResult, config: IntakePipelineConfig
+) -> IntakePipelineResult:
     """ """
     if not config.persist_artifacts:
         return result
-    
+
     try:
         artifact_path = save_intake_pipeline_artifacts(
             result,
             runs_root=config.runs_root,
             include_preview=config.include_preview_in_artifacts,
-            preview_row_count=config.preview_row_count
+            preview_row_count=config.preview_row_count,
         )
         return replace(result, artifact_path=artifact_path)
     except (OSError, TypeError, ValueError) as exc:
-        warnings = [
-            *result.warnings,
-            f"Failed to persist intake artifacts: {exc}"
-        ]
+        warnings = [*result.warnings, f"Failed to persist intake artifacts: {exc}"]
         return replace(result, warnings=warnings)
+
 
 def _format_data_quality_warnings(
     data_quality_result: DataQualityResult,
@@ -493,6 +487,7 @@ def _format_data_quality_warnings(
         for issue in data_quality_result.issues
         if issue.severity in {"warning", "critical"}
     ]
+
 
 def _create_target_profile_if_available(
     dataframe: pd.DataFrame,
@@ -522,9 +517,7 @@ def _create_target_profile_if_available(
             dataframe,
             target_column=task_inference_result.candidate_target,
             task_type=task_inference_result.task_type,
-            target_missing_warning_threshold=(
-                config.target_missing_warning_threshold
-            ),
+            target_missing_warning_threshold=(config.target_missing_warning_threshold),
             classification_imbalance_ratio_threshold=(
                 config.classification_imbalance_ratio_threshold
             ),
@@ -538,9 +531,7 @@ def _create_target_profile_if_available(
     except TargetProfileError as exc:
         return None, [f"Failed to create target profile: {exc}"]
 
-    return target_profile_result, _format_target_profile_warnings(
-        target_profile_result
-    )
+    return target_profile_result, _format_target_profile_warnings(target_profile_result)
 
 
 def _format_target_profile_warnings(
@@ -552,6 +543,7 @@ def _format_target_profile_warnings(
         for issue in target_profile_result.issues
         if issue.severity in {"warning", "critical"}
     ]
+
 
 def _create_model_recommendation_if_available(
     *,
@@ -587,6 +579,7 @@ def _create_model_recommendation_if_available(
 
     return model_recommendation_result, _deduplicate_strings(warnings)
 
+
 def _deduplicate_strings(values: list[str]) -> list[str]:
     """Deduplicate strings while preserving order."""
     seen: set[str] = set()
@@ -599,5 +592,3 @@ def _deduplicate_strings(values: list[str]) -> list[str]:
         unique_values.append(value)
 
     return unique_values
-
-    

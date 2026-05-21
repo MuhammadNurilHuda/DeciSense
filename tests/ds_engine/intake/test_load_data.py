@@ -141,7 +141,9 @@ def test_detect_duplicate_columns_for_tsv(tmp_path: Path) -> None:
     assert duplicates == ["name"]
 
 
-def test_detect_duplicate_columns_returns_empty_for_unsupported_raw_check(tmp_path: Path) -> None:
+def test_detect_duplicate_columns_returns_empty_for_unsupported_raw_check(
+    tmp_path: Path,
+) -> None:
     file_path = tmp_path / "sample.parquet"
     file_path.write_text("dummy", encoding="utf-8")
 
@@ -150,7 +152,9 @@ def test_detect_duplicate_columns_returns_empty_for_unsupported_raw_check(tmp_pa
     assert duplicates == []
 
 
-def test_find_duplicate_headers_in_delimited_file_returns_duplicates_once(tmp_path: Path) -> None:
+def test_find_duplicate_headers_in_delimited_file_returns_duplicates_once(
+    tmp_path: Path,
+) -> None:
     file_path = tmp_path / "duplicate_headers.csv"
     file_path.write_text("a,b,a,a,c\n1,2,3,4,5\n", encoding="utf-8")
 
@@ -159,7 +163,9 @@ def test_find_duplicate_headers_in_delimited_file_returns_duplicates_once(tmp_pa
     assert duplicates == ["a"]
 
 
-def test_find_duplicate_headers_in_delimited_file_strips_whitespace(tmp_path: Path) -> None:
+def test_find_duplicate_headers_in_delimited_file_strips_whitespace(
+    tmp_path: Path,
+) -> None:
     file_path = tmp_path / "duplicate_headers.csv"
     file_path.write_text(" age , income , age \n25,5000,30\n", encoding="utf-8")
 

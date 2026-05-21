@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 import pandas as pd
+
 
 @dataclass(frozen=True)
 class TabularValidationResult:
@@ -12,11 +15,10 @@ class TabularValidationResult:
     row_count: int = 0
     column_count: int = 0
 
+
 def validate_tabular_dataset(
-    dataframe: pd.DataFrame,
-    *,
-    min_rows: int = 2,
-    min_columns: int = 1) -> TabularValidationResult:
+    dataframe: pd.DataFrame, *, min_rows: int = 2, min_columns: int = 1
+) -> TabularValidationResult:
     """
     Validate whether a loaded dataframe is suitable for downstream tabular analysis
 
@@ -30,13 +32,17 @@ def validate_tabular_dataset(
     warnings: list[str] = []
 
     row_count = len(dataframe)
-    column_count = len(dataframe.columns) 
+    column_count = len(dataframe.columns)
 
     if column_count < min_columns:
-        errors.append(f"Dataset must contain at least {min_columns} column(s), but found {column_count}.")
+        errors.append(
+            f"Dataset must contain at least {min_columns} column(s), but found {column_count}."
+        )
 
     if row_count < min_rows:
-        errors.append(f"Dataset must contain at least {min_rows} row(s), but found {row_count}.")
+        errors.append(
+            f"Dataset must contain at least {min_rows} row(s), but found {row_count}."
+        )
 
     if dataframe.empty:
         errors.append("Dataset is empty.")
@@ -51,12 +57,11 @@ def validate_tabular_dataset(
         fully_missing_columns = dataframe.columns[dataframe.isna().all(axis=0)].tolist()
         if fully_missing_columns:
             warnings.append(
-                "Some columns contain only missing values: "
-                f"{fully_missing_columns}"
+                f"Some columns contain only missing values: {fully_missing_columns}"
             )
-    
+
     return TabularValidationResult(
-        is_valid= not errors,
+        is_valid=not errors,
         errors=errors,
         warnings=warnings,
         row_count=row_count,

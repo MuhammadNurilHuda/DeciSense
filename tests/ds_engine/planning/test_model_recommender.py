@@ -39,7 +39,9 @@ def _candidate_names(result: ModelRecommendationResult) -> list[str]:
     return [candidate.model_name for candidate in result.candidates]
 
 
-def test_recommend_model_for_numeric_classification_prefers_hist_gradient_boosting() -> None:
+def test_recommend_model_for_numeric_classification_prefers_hist_gradient_boosting() -> (
+    None
+):
     dataframe = pd.DataFrame(
         {
             "age": [20, 30, 40, 50, 60, 70],
@@ -66,11 +68,20 @@ def test_recommend_model_for_numeric_classification_prefers_hist_gradient_boosti
     assert "LogisticRegression" in _candidate_names(result)
 
 
-def test_recommend_model_uses_catboost_when_many_categorical_features_and_optional_dependencies_allowed() -> None:
+def test_recommend_model_uses_catboost_when_many_categorical_features_and_optional_dependencies_allowed() -> (
+    None
+):
     dataframe = pd.DataFrame(
         {
             "city": ["A", "B", "C", "D", "E", "F"],
-            "merchant_category": ["food", "retail", "food", "travel", "retail", "travel"],
+            "merchant_category": [
+                "food",
+                "retail",
+                "food",
+                "travel",
+                "retail",
+                "travel",
+            ],
             "customer_id": ["C001", "C002", "C003", "C004", "C005", "C006"],
             "target": [0, 1, 0, 1, 0, 1],
         }
@@ -119,7 +130,9 @@ def test_recommend_model_prefers_random_forest_for_imbalanced_classification() -
     assert result.recommended_candidate.initial_params["class_weight"] == "balanced"
 
 
-def test_recommend_model_for_numeric_regression_prefers_hist_gradient_boosting() -> None:
+def test_recommend_model_for_numeric_regression_prefers_hist_gradient_boosting() -> (
+    None
+):
     dataframe = pd.DataFrame(
         {
             "feature_a": [1, 2, 3, 4, 5, 6],

@@ -5,7 +5,6 @@ from typing import Any, Literal
 
 from ds_engine.pipeline import IntakePipelineResult
 
-
 AnalysisReportStatus = Literal[
     "ready_for_training_approval",
     "requires_user_input",
@@ -114,7 +113,11 @@ class AnalysisReportResult:
         ]
 
         model_section = next(
-            (section for section in self.sections if section.title == "Model Recommendation"),
+            (
+                section
+                for section in self.sections
+                if section.title == "Model Recommendation"
+            ),
             None,
         )
         if model_section is not None:
@@ -152,15 +155,22 @@ def create_analysis_report(
     )
 
 
-def _infer_report_status(
-    pipeline_result: IntakePipelineResult,
-) -> AnalysisReportStatus:
+def _infer_report_status(pipeline_result: IntakePipelineResult) -> AnalysisReportStatus:
     """Infer report-level status from pipeline result."""
     if pipeline_result.status in {"load_failed", "validation_failed", "pipeline_error"}:
         return "failed"
 
-    if pipeline_result.requires_user_target_input:
+    task_inference = pipeline_result.task_inference_result
+    if task_inference is None or task_inference.status != "ok":
         return "requires_user_input"
+
+    recommendation = pipeline_result.model_recommendation_result
+    if recommendation is not None:
+        if recommendation.is_ready_for_training_approval:
+            return "ready_for_training_approval"
+
+        if recommendation.status == "blocked":
+            return "blocked"
 
     if pipeline_result.is_ready_for_training_approval:
         return "ready_for_training_approval"
@@ -360,7 +370,10 @@ def _build_target_profile_section(
             ]
         )
 
-    if target_profile.task_type == "regression" and target_profile.numeric_summary is not None:
+    if (
+        target_profile.task_type == "regression"
+        and target_profile.numeric_summary is not None
+    ):
         summary = target_profile.numeric_summary
         lines.extend(
             [
@@ -372,10 +385,7 @@ def _build_target_profile_section(
             ]
         )
 
-    lines.extend(
-        f"Issue: {issue.message}"
-        for issue in target_profile.issues
-    )
+    lines.extend(f"Issue: {issue.message}" for issue in target_profile.issues)
 
     return ReportSection(title="Target Profile", lines=lines)
 
@@ -395,19 +405,14 @@ def _build_model_recommendation_section(
     recommended_candidate = recommendation.recommended_candidate
     if recommended_candidate is not None:
         lines.append(f"Initial parameters: {recommended_candidate.initial_params}")
+        lines.extend(f"Reason: {reason}" for reason in recommended_candidate.reasoning)
         lines.extend(
-            f"Reason: {reason}"
-            for reason in recommended_candidate.reasoning
-        )
-        lines.extend(
-            f"Concern: {concern}"
-            for concern in recommended_candidate.concerns
+            f"Concern: {concern}" for concern in recommended_candidate.concerns
         )
 
     if recommendation.blocked_reasons:
         lines.extend(
-            f"Blocked reason: {reason}"
-            for reason in recommendation.blocked_reasons
+            f"Blocked reason: {reason}" for reason in recommendation.blocked_reasons
         )
 
     return ReportSection(title="Model Recommendation", lines=lines)

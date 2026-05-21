@@ -10,7 +10,6 @@ from ds_engine.profiling.schema_profile import (
     create_schema_profile,
 )
 
-
 QualitySeverity = Literal["info", "warning", "critical"]
 
 
@@ -110,24 +109,17 @@ def create_data_quality_report(
     missing_cell_ratio = _safe_ratio(missing_cell_count, total_cell_count)
 
     rows_with_missing_count = (
-        int(missing_mask.any(axis=1).sum())
-        if row_count > 0 and column_count > 0
-        else 0
+        int(missing_mask.any(axis=1).sum()) if row_count > 0 and column_count > 0 else 0
     )
     rows_with_missing_ratio = _safe_ratio(rows_with_missing_count, row_count)
 
     fully_missing_row_count = (
-        int(missing_mask.all(axis=1).sum())
-        if row_count > 0 and column_count > 0
-        else 0
+        int(missing_mask.all(axis=1).sum()) if row_count > 0 and column_count > 0 else 0
     )
     fully_missing_row_ratio = _safe_ratio(fully_missing_row_count, row_count)
 
     columns_with_missing_values = (
-        [
-            str(column)
-            for column in dataframe.columns[missing_mask.any(axis=0)].tolist()
-        ]
+        [str(column) for column in dataframe.columns[missing_mask.any(axis=0)].tolist()]
         if column_count > 0
         else []
     )
@@ -222,7 +214,10 @@ def _build_quality_issues(
             )
         )
 
-    if duplicate_row_ratio >= duplicate_row_warning_threshold and duplicate_row_count > 0:
+    if (
+        duplicate_row_ratio >= duplicate_row_warning_threshold
+        and duplicate_row_count > 0
+    ):
         issues.append(
             DataQualityIssue(
                 code="duplicate_rows",

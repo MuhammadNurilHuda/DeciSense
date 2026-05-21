@@ -1,16 +1,18 @@
 from __future__ import annotations
+
 import csv
-import pandas as pd
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Final
 
-SUPPORTED_EXTENSIONS: Final [set[str]] = {
-    ".csv", ".tsv", ".xlsx", ".xls", ".parquet"
-}
+import pandas as pd
+
+SUPPORTED_EXTENSIONS: Final[set[str]] = {".csv", ".tsv", ".xlsx", ".xls", ".parquet"}
+
 
 class DataLoadError(Exception):
     """Raised when a dataset can't be loaded as a supported tabular file"""
+
 
 @dataclass(frozen=True)
 class LoadedDataset:
@@ -21,7 +23,7 @@ class LoadedDataset:
     file_name: str
     file_extension: str
     row_count: int
-    column_count : int
+    column_count: int
 
 
 def load_tabular_data(file_path: str | Path) -> LoadedDataset:
@@ -52,12 +54,14 @@ def load_tabular_data(file_path: str | Path) -> LoadedDataset:
         raise FileNotFoundError(f"Dataset file not found: {path}")
     if not path.is_file():
         raise DataLoadError(f"Expected a file path, but got: {path}")
-    
+
     extension = path.suffix.lower()
     if extension not in SUPPORTED_EXTENSIONS:
         supported = ", ".join(sorted(SUPPORTED_EXTENSIONS))
-        raise DataLoadError(f"Unsupported file extension '{extension}'. Supported formats: {supported}")
-    
+        raise DataLoadError(
+            f"Unsupported file extension '{extension}'. Supported formats: {supported}"
+        )
+
     duplicate_columns = _detect_duplicate_columns(path, extension)
     if duplicate_columns:
         raise DataLoadError(
@@ -66,12 +70,14 @@ def load_tabular_data(file_path: str | Path) -> LoadedDataset:
         )
 
     dataframe = _read_dataframe(path, extension)
-    return LoadedDataset(dataframe=dataframe,
-                         file_path=path,
-                         file_name=path.name,
-                         file_extension=extension,
-                         row_count=len(dataframe),
-                         column_count=len(dataframe.columns))
+    return LoadedDataset(
+        dataframe=dataframe,
+        file_path=path,
+        file_name=path.name,
+        file_extension=extension,
+        row_count=len(dataframe),
+        column_count=len(dataframe.columns),
+    )
 
 
 def _detect_duplicate_columns(path: Path, extension: str) -> list[str]:
@@ -90,7 +96,8 @@ def _detect_duplicate_columns(path: Path, extension: str) -> list[str]:
         return _find_duplicate_headers_in_delimited_file(path, delimiter="\t")
     return []
 
-def _find_duplicate_headers_in_delimited_file(path: Path, delimiter:str) -> list[str]:
+
+def _find_duplicate_headers_in_delimited_file(path: Path, delimiter: str) -> list[str]:
     """
     Read the first row of a delimited file and return duplicate header names.
     """
@@ -117,6 +124,7 @@ def _find_duplicate_headers_in_delimited_file(path: Path, delimiter:str) -> list
 
     return duplicates
 
+
 def _read_dataframe(path: Path, extension: str) -> pd.DataFrame:
     """
     Dispatch file reading based on file extension.
@@ -124,7 +132,7 @@ def _read_dataframe(path: Path, extension: str) -> pd.DataFrame:
     try:
         if extension == ".csv":
             return pd.read_csv(path)
-        if extension ==".tsv":
+        if extension == ".tsv":
             return pd.read_csv(path, sep="\t")
         if extension in {".xlsx", ".xls"}:
             return pd.read_excel(path)
@@ -136,6 +144,4 @@ def _read_dataframe(path: Path, extension: str) -> pd.DataFrame:
             f"Failed to load dataset from '{path.name}': {exc}"
         ) from exc
 
-    raise DataLoadError(
-        f"No loader is defined for extension '{extension}'"
-    )
+    raise DataLoadError(f"No loader is defined for extension '{extension}'")

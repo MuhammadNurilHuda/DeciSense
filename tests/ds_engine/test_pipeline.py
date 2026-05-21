@@ -239,7 +239,10 @@ def test_run_intake_pipeline_attaches_artifact_path_when_persistence_is_enabled(
     )
 
     assert result.status == "completed"
-    assert result.artifact_path == tmp_path / "runs" / "run_with_artifact" / "intake" / "intake_result.json"
+    assert (
+        result.artifact_path
+        == tmp_path / "runs" / "run_with_artifact" / "intake" / "intake_result.json"
+    )
     assert captured["runs_root"] == tmp_path / "runs_root"
     assert captured["include_preview"] is False
     assert captured["preview_row_count"] == 3

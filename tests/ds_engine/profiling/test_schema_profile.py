@@ -21,9 +21,7 @@ def test_create_schema_profile_summarizes_core_column_types() -> None:
             "age": [20, 30, 40],
             "city": ["Jakarta", "Bandung", "Jakarta"],
             "is_active": [True, False, True],
-            "signup_date": pd.to_datetime(
-                ["2024-01-01", "2024-01-02", "2024-01-03"]
-            ),
+            "signup_date": pd.to_datetime(["2024-01-01", "2024-01-02", "2024-01-03"]),
             "feedback": [
                 "The service experience was smooth and consistently helpful.",
                 "The onboarding process was clear and easy to follow.",
