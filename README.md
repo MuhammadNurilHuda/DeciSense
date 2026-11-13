@@ -1065,4 +1065,4 @@ This may change as the project stabilizes.
 
 ## License
 
-TBD
+[MIT](LICENSE)
