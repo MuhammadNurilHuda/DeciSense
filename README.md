@@ -157,12 +157,6 @@ DeciSense/
 ├─ runs/
 │  └─ <run_id>/
 │
-├─ openclaw/
-│  ├─ config/
-│  └─ skills/
-│     └─ decisense-tabular-ds/
-│        └─ SKILL.md
-│
 ├─ ds_engine/
 │  ├─ interfaces/
 │  │  └─ decisense_cli.py
@@ -592,14 +586,6 @@ Analysis / Approval / Training workflows
 JSON response + package path
 ```
 
-The current OpenClaw-facing skill lives at:
-
-```text
-openclaw/skills/decisense-tabular-ds/SKILL.md
-```
-
-The skill teaches the agent to call the DeciSense CLI for two event types.
-
 ### Dataset upload
 
 ```bash
@@ -716,29 +702,7 @@ Expected status:
 Telegram default: enabled, configured, running, connected
 ```
 
-### 4. Make the DeciSense skill available to OpenClaw
-
-The DeciSense skill file is:
-
-```text
-openclaw/skills/decisense-tabular-ds/SKILL.md
-```
-
-Make sure OpenClaw can discover this skill from its active workspace or managed skills directory.
-
-Verify:
-
-```bash
-openclaw skills list
-```
-
-Expected:
-
-```text
-decisense-tabular-ds ... ready
-```
-
-### 5. Verify the full agent runtime
+### 4. Verify the full agent runtime
 
 Raw model inference is not enough. Telegram uses the OpenClaw agent runtime, so verify that path too:
 
@@ -767,7 +731,7 @@ Expected result:
 }
 ```
 
-### 6. Test Telegram
+### 5. Test Telegram
 
 Send this message to the Telegram bot:
 
@@ -783,7 +747,7 @@ OK
 
 Then upload a supported tabular dataset and ask DeciSense to analyze it.
 
-### 7. Reset stale sessions when needed
+### 6. Reset stale sessions when needed
 
 If Telegram still behaves like an older session, send:
 
